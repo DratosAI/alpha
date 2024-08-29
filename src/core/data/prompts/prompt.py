@@ -1,39 +1,62 @@
 from typing import Optional, List
 
+from api.config.config import Config
 from src.core.data.domain import DomainObject, DomainObjectAccessor, DomainSelector
-from src.core.data.domain.comms.prompt import PromptSettings
+from src.core.data.domain.base.domain_object import DomainObjectFactory
+from src.core.data.prompts import PromptSettings
+
+
+class SystemPrompt(DomainObject):
+    """System prompt for a language model"""
+
+    __tablename__ = "system_prompts"
+
+    def __init__(self, name: str, system_prompt: str, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.system_prompt = system_prompt
+
+
+class UserPrompt(DomainObject):
+    """User prompt for a language model"""
+
+    __tablename__ = "user_prompts"
+
+    def __init__(self, name: str, user_prompt: str, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.user_prompt = user_prompt
+
+
+class PromptSettingsFactory(DomainObjectFactory):
+    @staticmethod
+    def create_new_prompt_settings(**kwargs) -> PromptSettings:
+        return PromptSettings(**kwargs)
+
+
+class PromptFactory(DomainObjectFactory):
+    @staticmethod
+    def create_new_prompt(**kwargs) -> PromptSettings:
+        return PromptSettings(**kwargs)
+
 
 class Prompt(DomainObject):
     """Prompt for a language model"""
 
-    def __init__(self, 
-            name: str,
-            system_prompt: , 
-            user_prompt: str, 
-            **kwargs
-            ):
-        
+    def __init__(
+        self,
+        name: str,
+        system_prompt: SystemPrompt,
+        user_prompt: UserPrompt,
+        settings: PromptSettings,
+        **kwargs
+    ):
+
         super().__init__(**kwargs)
         self.name = name
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self.settings = settings
 
 
 class PromptSettingsSelector(DomainSelector):
