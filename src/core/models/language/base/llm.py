@@ -101,9 +101,9 @@ class LLM(DomainObject):
 
         if self.stream:
             self.client = AsyncOpenAI(
-                host=os.environ.get("OPENAI_API_BASE"), 
+                host=os.environ.get("OPENAI_API_BASE"),
                 api_key=API_KEY)
         else:
             self.client = OpenAI(
-                host=os.environ.get("OPENAI_API_BASE"), 
+                host=os.environ.get("OPENAI_API_BASE"),
                 api_key=API_KEY)

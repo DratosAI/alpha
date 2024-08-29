@@ -14,8 +14,6 @@ from fastapi import FastAPI, HTTPException
 from typing import List, Optional
 import daft
 from datetime import datetime
-from api.v1.models.message import MessageCreate, MessageUpdate, Message
-from api.v1.models.custom_models import CustomModel
 
 
 router = APIRouter()
