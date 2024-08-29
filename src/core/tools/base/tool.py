@@ -1,7 +1,9 @@
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Union
 from pydantic import Field
 from starlette import Request, Response
-
+import ray
+import daft
+from api.config import config
 
 from src.core.data.domain.base.domain_object import (
     DomainObject,
@@ -52,23 +54,25 @@ class Tool(DomainObject):
             raise ValueError(f"Unsupported tool type: {self.tool_type}")
 
     def _execute_sql(self, request: Request) -> Response:
-        # TODO: no need to assume, please make robust with error handling
-        # Assuming the SQL query is stored in self.func
-        df = daft.sql(self.func)
-        # Process the dataframe and return a response
-        # This is a placeholder and should be implemented based on specific requirements
-        return Response(content=df.to_pandas().to_json(), media_type="application/json")
+        try:
+            df = daft.sql(self.func)
+            return Response(
+                content=df.to_pandas().to_json(), media_type="application/json"
+            )
+        except Exception as e:
+            return Response(content=str(e), status_code=500)
 
     def _execute_python(self, request: Request) -> Response:
-        # Execute the Python function
-        result = self.func(request)
-        # Assuming the function returns a daft DataFrame
-        if isinstance(result, daft.DataFrame):
-            return Response(
-                content=result.to_pandas().to_json(), media_type="application/json"
-            )
-        else:
-            return Response(content=str(result), media_type="text/plain")
+        try:
+            result = self.func(request)
+            if isinstance(result, daft.DataFrame):
+                return Response(
+                    content=result.to_pandas().to_json(), media_type="application/json"
+                )
+            else:
+                return Response(content=str(result), media_type="text/plain")
+        except Exception as e:
+            return Response(content=str(e), status_code=500)
 
     def __str__(self):
         return f"{self.name} ({self.tool_type}): {self.desc}"
