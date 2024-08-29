@@ -1,3 +1,4 @@
+"""
 ### Chat
 # - `POST /api/chat/settings`: Alter chat settings
 # - `POST /api/chat/send`: Send message
@@ -5,21 +6,26 @@
 # - `POST /api/chat/select/knowledge_graph`: Select Knowledge Graph
 # - `GET /api/chat/history/{sessionId}`: Get chat history for a session
 # - `POST /api/chat/history/{sessionId}`: Save chat history for a session
-
+"""
 
 from fastapi import APIRouter
-
-router = APIRouter()
-
-
-@router.get("/chats")
-
-
 import ray
 from fastapi import FastAPI, HTTPException
 from typing import List, Optional
 import daft
 from datetime import datetime
+from api.v1.models.message import MessageCreate, MessageUpdate, Message
+from api.v1.models.custom_models import CustomModel
+
+
+router = APIRouter()
+app = FastAPI("Dratos Chat API")
+app.include_router(router)
+
+
+@router.get("/chats")
+async def get_chats():
+    return {"message": "Hello World"}
 
 
 @app.post("/messages", response_model=str)
@@ -119,9 +125,10 @@ class ChatRoom(CustomModel):
         self.df = self.df.concat(new_row)
 
     def save(self):
-        uc_client = get_uc()
+        raise NotImplementedError("Not implemented")
+        # uc_client = get_uc()
 
-        table = uc_client.
+        # table = uc_client.
 
     # Other methods (save_to_firestore, load_from_firestore, etc.) remain the same
     # ...
@@ -131,8 +138,6 @@ class ChatRoom(CustomModel):
 ray.init()
 chat_app = ChatApp.remote("path/to/firebase_credentials.json")
 
-# FastAPI app
-app = FastAPI()
 
 if __name__ == "__main__":
     import uvicorn

@@ -49,15 +49,15 @@ class Agent(DomainObject):
         tools: Optional[List[BaseTool]] = Field(
             default=None,
             description="The tools that the agent can use"
-        ),
-    ):
+        )
+
         super().__init__()
-        self.name =  name
+        self.name = name
         self.models = models
         self.reasoning = reasoning
         self.embedding = embedding
         self.tools = tools
-        self.memory = 
+        self.memory = memory
 
         self.settings.MAX_NUM_PENDING_TASKS = 100
         self.settings.MAX_CONCURRENT_TASKS = 10
