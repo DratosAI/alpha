@@ -76,3 +76,8 @@ async def get_preferences(current_user: User = Depends(get_current_admin_user)):
 async def update_preferences(preferences: SystemPreferences, current_user: User = Depends(get_current_admin_user)):
     await SystemSettings.update(preferences.dict())
     return {"success": True, "error": None}
+
+# Handle HttpException
+@router.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    return {"error": exc.detail}

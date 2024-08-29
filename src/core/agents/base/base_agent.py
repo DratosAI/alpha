@@ -5,9 +5,11 @@ from pydantic import Field
 from ray import serve
 from ray.serve.handle import DeploymentHandle, DeploymentResponse
 
+from src.core.data.prompts.prompt import Prompt
 from src.core.tools.base.tool import Tool
-from src.core.models.language.base import LLM
 from src.core.data.domain.base.domain_object import DomainObject
+from src.core.models.language.base.llm import LLM
+
 
 class AgentStatus(str, Enum):
     IDLE = "idle"
@@ -31,64 +33,64 @@ class Agent(DomainObject):
             description="The status of the agent"
         ),
         llm: Optional[LLM] = Field(
-            default= MMLLM(),
+            default=LLM(),
             description="The Multimodal Model"
         ),
-        reasoning: Optional[DeploymentHandle] = Field(
-            ...,
-            description="The embedding model"
-        ),
-        memory: Optional[DeploymentHandle] = Field(
-            ...,
-            description="The embedding model",
-        ),
-        embedding: Optional[DeploymentHandle] = Field(
-            default=MMEmbedding(),
-            description="The embedding model"
-        ),
-        tools: Optional[List[BaseTool]] = Field(
+        tools: Optional[List[Tool]] = Field(
             default=None,
             description="The tools that the agent can use"
-        ),
-    ):
+        )
+        is_async: Optional[bool] = Field(
+            default=False,
+            description="Use asynchrony (i.e. for streaming)."
+        )
+
         super().__init__()
-        self.name =  name
-        self.models = models
-        self.reasoning = reasoning
-        self.embedding = embedding
+        self.name = name
+        self.llm = llm
         self.tools = tools
-        self.memory = 
+        self.status = status
+        self.is_async = is_async
 
-        self.settings.MAX_NUM_PENDING_TASKS = 100
-        self.settings.MAX_CONCURRENT_TASKS = 10
+    def __call__(self, prompt: Prompt):
+        response = self.llm.complete(prompt)
+        return response
 
+     def __call__(self, prompt: Prompt) -> str:
+        """Chat with the model"""
+        if self.is_async:
+            return self.__async_call__(prompt)
+        else:
+            return self.__sync_call__(prompt)
 
-def __call__(self, request: Request, task: Task):
-    prompt = Request.prompt
-    response = self.llm.complete(prompt)
-    return response
+    def __sync_call__(self, prompt: Prompt) -> str:
+        """Chat with the model"""
+        pass
 
-    
-    
-def register(self):
-    unity.tables('data.agents')
+    async def __async_call__(self, request: Request) -> Response:
+        """Chat with the model"""
+        self.prompt = request.prompt
+        self.messages = request.messages
+        self.model_name = request.model_name
+        self.prompt.system_prompt = request.system_prompt
+        self.prompt.settings = request.prompt.settings
 
+        # TODO: Figure out how to
+        # TODO: Add support for other models
 
-def execute_task(self, Task) -> Result:
-    self.status = "Running"
-    self.status = "Running"
-    self.logger.info(f"{timestamp.utc(now)}Agent {self.name} started task {Task.name} [{Task.id}]")
+        await self.client.chat.completions.create(
+            model=self.model_name,
+            messages=self.messages,
+            max_tokens=self.prompt.max_tokens,
+            max_length=self.prompt.max_length,
+            temperature=self.prompt.temperature,
+            top_k=self.prompt.top_k,
+            top_p=self.prompt.top_p,
+            seed=self.prompt.seed,
+            stop_token=self.prompt.stop_token,
+            response_model=request.response_model,
+            stream=request.stream,
+        )
 
-    return result
-
-
-def get_status(self) -> AgentStatus:
-    return self.status
-
-
-def get_tools(self) -> List[BaseTool]:
-    return self.tools
-
-
-def select_tool(self, tools, criteria, strategy):
-        print(self.tools)
+    def get_status(self) -> AgentStatus:
+        return self.status
