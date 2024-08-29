@@ -53,43 +53,39 @@ class Agent(DomainObject):
         self.is_async = is_async
 
     def __call__(self, prompt: Prompt):
-        response = self.llm.complete(prompt)
+        response = 
         return response
 
-     def __call__(self, prompt: Prompt) -> str:
+    def __call__(self, prompt: Prompt, messages: Messages) -> str:
         """Chat with the model"""
         if self.is_async:
-            return self.__async_call__(prompt)
+            return self.__async_call__(
+                prompt=prompt, 
+                messages = messages,
+                is_async = True
+        )
         else:
-            return self.__sync_call__(prompt)
+            return self.__sync_call__(
+                prompt=prompt, 
+                messages = messages,
+                is_async = False
+        )
 
     def __sync_call__(self, prompt: Prompt) -> str:
         """Chat with the model"""
-        pass
+        response = self.llm.chat(prompt=prompt, 
+                            messages = messages,
+                            is_async = False
+        )
+        return response
 
-    async def __async_call__(self, request: Request) -> Response:
+
+    async def __async_call__(self, prompt: Prompt, messages: Messages ) -> str:
         """Chat with the model"""
-        self.prompt = request.prompt
-        self.messages = request.messages
-        self.model_name = request.model_name
-        self.prompt.system_prompt = request.system_prompt
-        self.prompt.settings = request.prompt.settings
 
-        # TODO: Figure out how to
-        # TODO: Add support for other models
-
-        await self.client.chat.completions.create(
-            model=self.model_name,
-            messages=self.messages,
-            max_tokens=self.prompt.max_tokens,
-            max_length=self.prompt.max_length,
-            temperature=self.prompt.temperature,
-            top_k=self.prompt.top_k,
-            top_p=self.prompt.top_p,
-            seed=self.prompt.seed,
-            stop_token=self.prompt.stop_token,
-            response_model=request.response_model,
-            stream=request.stream,
+        await self.llm.chat(prompt=prompt, 
+                            messages = messages,
+                            is_async = True
         )
 
     def get_status(self) -> AgentStatus:

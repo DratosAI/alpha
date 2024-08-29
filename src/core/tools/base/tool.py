@@ -12,6 +12,13 @@ from src.core.data.domain.base.domain_object import (
     DomainObjectAccessor,
 )
 
+from enum import Enum
+
+
+class ToolTypes(str, Enum):
+    python = "python"
+    sql = "sql"
+
 
 @ray.remote
 class Tool(DomainObject):
@@ -21,27 +28,27 @@ class Tool(DomainObject):
 
     def __init__(
         self,
-        name: str = "Pyfunc",
+        name: str = "General Pyfunc",
         desc: Optional[str] = None,
-        tool_type: str = ...,
-        func: Union[str, Callable] = None,
+        type: Optional[ToolTypes] = "python",
+        function: Union[str, Callable] = None,
     ):
         super().__init__()
         self.name = name
         self.desc = desc
-        self.tool_type = tool_type
-        self.func = func
+        self.type = type
+        self.function = function
 
     class Config:
         validate_assignment = True
 
     @classmethod
     def create_sql_tool(cls, name: str, desc: Optional[str], sql_query: str):
-        return cls(name=name, desc=desc, tool_type="SQL", func=sql_query)
+        return cls(name=name, desc=desc, type="SQL", function=sql_query)
 
     @classmethod
-    def create_python_tool(cls, name: str, desc: Optional[str], func: Callable):
-        return cls(name=name, desc=desc, tool_type="Python", func=func)
+    def create_python_tool(cls, name: str, desc: Optional[str], function: Callable):
+        return cls(name=name, desc=desc, type="Python", function=function)
 
     # TODO: Implement resource handler
     # @daft.udf(num_cpus=resource_handler)
@@ -56,11 +63,9 @@ class Tool(DomainObject):
     def _execute_sql(self, request: Request) -> Response:
         try:
             df = daft.sql(self.func)
-            return Response(
-                content=df.to_pandas().to_json(), media_type="application/json"
-            )
+            return df
         except Exception as e:
-            return Response(content=str(e), status_code=500)
+            return e
 
     def _execute_python(self, request: Request) -> Response:
         try:
@@ -72,7 +77,7 @@ class Tool(DomainObject):
             else:
                 return Response(content=str(result), media_type="text/plain")
         except Exception as e:
-            return Response(content=str(e), status_code=500)
+            return e
 
     def __str__(self):
         return f"{self.name} ({self.tool_type}): {self.desc}"
@@ -81,7 +86,7 @@ class Tool(DomainObject):
 class ToolFactory(DomainObjectFactory):
     @staticmethod
     def create_tool(name: str, description: str, func: Callable) -> Tool:
-        return Tool.create_new(name=name, desc=description, func=func)
+        return Tool.create_new(name=name, desc=description, function=func)
 
     @staticmethod
     async def get_tool_by_name(name: str) -> Optional[Tool]:

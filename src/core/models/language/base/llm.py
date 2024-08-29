@@ -2,16 +2,20 @@ from typing import List, Optional
 from pydantic import Field
 from dotenv import load_dotenv
 import os
-import asyncio 
+import asyncio
 
 from openai import OpenAI, AsyncOpenAI
 import mlflow
+from mlflow import deployments
 from starlette import Request, Response
-from tranformers import pipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 
-from src.core.data.domain import PromptSettings, DomainObject, DomainObjectError
 
+from src.core.data.domain.base import DomainObject, DomainObjectError
+from src.core.data.prompts import Prompt, PromptSettings
+from src.core.data.structs.messages import Message
+from api.config import config
+
+deployments.get_client()
 load_dotenv()
 
 
@@ -22,20 +26,17 @@ class LLM(DomainObject):
         self,
         model_name: Optional[str] = Field(
             default="openai/gpt4o-mini",
-            description="Name of the model in the form of a HuggingFace model name"
+            description="Name of the model in the form of a HuggingFace model name",
         ),
         prompt_settings: Optional[PromptSettings] = Field(
-            default=None,
-            description="Prompt settings to use for the model"
+            default=None, description="Prompt settings to use for the model"
         ),
         history: Optional[List[str]] = Field(
-            default=[],
-            description="History of messages"
+            default=[], description="History of messages"
         ),
         is_async: Optional[bool] = Field(
-            default=False,
-            description="Whether to stream the output"
-        )
+            default=False, description="Whether to stream the output"
+        ),
     ):
         self.super().__init__()
         self.model_name = model_name
@@ -43,43 +44,31 @@ class LLM(DomainObject):
         self.history = history
         self.is_async = is_async
 
+    def __call__(
+        self,
+        prompt: Prompt,
+        messages: Optional[List[Message]],
+        response_model: Optional[DomainObject],
+    ) -> str:
+        """Chat with the model"""
+
+        client = self.get_client()
+
         mlflow.openai.autolog()
-
-    def __call__(self, request: Request) -> Response:
-        """Chat with the model"""
-        if self.stream:
-            return self.__async_call__(request)
-        else:
-            return self.__sync_call__(request)
-
-    def __sync_call__(self, request: Request) -> Response:
-        """Chat with the model"""
-        pass
-
-    async def __async_call__(self, request: Request) -> Response:
-        """Chat with the model"""
-        self.prompt = request.prompt
-        self.messages = request.messages
-        self.model_name = request.model_name
-        self.prompt.system_prompt = request.system_prompt
-        self.prompt.settings = request.prompt.settings
-
-        # TODO: Figure out how to
-        # TODO: Add support for other models
-
-        await self.client.chat.completions.create(
+        response = client.chat.completions.create(
             model=self.model_name,
-            messages=self.messages,
-            max_tokens=self.prompt.max_tokens,
-            max_length=self.prompt.max_length,
-            temperature=self.prompt.temperature,
-            top_k=self.prompt.top_k,
-            top_p=self.prompt.top_p,
-            seed=self.prompt.seed,
-            stop_token=self.prompt.stop_token,
-            response_model=request.response_model,
-            stream=request.stream,
+            messages=messages,
+            max_tokens=prompt.settings.max_tokens,
+            max_length=prompt.settings.max_length,
+            temperature=prompt.settings.temperature,
+            top_k=prompt.settings.top_k,
+            top_p=prompt.settings.top_p,
+            seed=prompt.settings.seed,
+            stop_token=prompt.settings.stop_token,
+            response_model=response_model,
+            stream=self.is_async,
         )
+        return response
 
     def get_provider(model_name: str) -> str:
         """Get the provider of the model"""
@@ -99,11 +88,8 @@ class LLM(DomainObject):
         else:
             raise ValueError(f"Invalid provider: {provider}")
 
-        if self.stream:
-            self.client = AsyncOpenAI(
-                host=os.environ.get("OPENAI_API_BASE"),
-                api_key=API_KEY)
-        else:
-            self.client = OpenAI(
-                host=os.environ.get("OPENAI_API_BASE"),
-                api_key=API_KEY)
+        client = config.openai(
+            provider=provider, is_async=self.is_async, api_key=API_KEY
+        )
+
+        return client
