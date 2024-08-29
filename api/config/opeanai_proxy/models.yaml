@@ -1,0 +1,28 @@
+model_list:
+  - model_name: claude-3-5
+    litellm_params:
+      model: claude-3-5-sonnet
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: gemini-pro-flash-free
+    litellm_params:
+      model: openrouter/google/gemini-flash-8b-1.5-exp
+      api_key: os.environ/OPENROUTER_API_KEY
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini ### MODEL NAME sent to `litellm.completion()` ###
+      api_key: os.environ/OPENROUTER_API_KEY
+  - model_name: vllm-models
+    litellm_params:
+      model: openai/facebook/opt-125m # the `openai/` prefix tells litellm it's openai compatible
+      api_base: http://0.0.0.0:4000/v1
+      api_key: none
+      rpm: 1440
+    model_info:
+      version: 2
+
+general_settings:
+  master_key: sk-1234 # [OPTIONAL] Only use this if you to require all calls to contain this key (Authorization: Bearer sk-1234)
+  alerting: ["slack"] # [OPTIONAL] If you want Slack Alerts for Hanging LLM requests, Slow llm responses, Budget Alerts. Make sure to set `SLACK_WEBHOOK_URL` in your env
+
+environment_variables:
+  SLACK_WEBHOOK_URL: "https://discord.com/api/webhooks/1278842025059418284/ShBQJKEZbycSpin4RXtWPfsxLm8jezLRKWlcwNK6_gN9QovVqqsxaFPPBg-bElO83ajB"

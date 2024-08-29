@@ -70,26 +70,7 @@ class LLM(DomainObject):
         )
         return response
 
-    def get_provider(model_name: str) -> str:
-        """Get the provider of the model"""
-        return model_name.split("/")[0]
-
     def get_client(self) -> OpenAI | AsyncOpenAI:
-        provider = self.get_provider(self.model_name)
-
-        if provider == "openai":
-            API_KEY = os.environ.get("OPENAI_API_KEY")
-        elif provider == "anthropic":
-            API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-        elif provider == "huggingface":
-            API_KEY = os.environ.get("HUGGINGFACE_API_KEY")
-        elif provider == "google":
-            os.environ.get("GOOGLE_API_KEY")
-        else:
-            raise ValueError(f"Invalid provider: {provider}")
-
-        client = config.openai(
-            provider=provider, is_async=self.is_async, api_key=API_KEY
-        )
+        client = config.openai_proxy(is_async=self.is_async)
 
         return client

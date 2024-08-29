@@ -16,3 +16,4 @@ lancedb
 openai
 mlflow
 transformers
+"litellm[proxy]"

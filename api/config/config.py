@@ -12,10 +12,6 @@ import mlflow
 load_dotenv()
 
 
-
-
-
-
 class Config:
     _instance: Optional["Config"] = None
 
@@ -70,31 +66,25 @@ class Config:
             self._mlflow = mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
         return self._mlflow
 
-    def openai(self,
+    def openai_proxy(
+        self,
         is_async: Optional[bool],
         api_key: Optional[str] = os.environ.get("OPENAI_API_KEY"),
     ) -> AsyncOpenAI | OpenAI:
         if self._openai is None:
-            OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE")
-            OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+            LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE")
 
             if is_async:
                 self._openai = AsyncOpenAI(
-                    api_key=OPENAI_API_KEY,
-                    api_base=OPENAI_API_BASE,
+                    api_base=LITELLM_API_BASE,
                     stream=True,
-                    timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
                 )
             else:
-                self._openai = OpenAI(
-                    api_key=OPENAI_API_KEY,
-                    api_base=OPENAI_API_BASE,
-                    stream=False
-                    timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
-                )
+                self._openai = OpenAI(api_base=LITELLM_API_BASE, stream=False)
         return self._openai
-    
-    def openai_proxy()
 
 
 config = Config.get_instance()
+
+# Usage pattern for config
+# config.openai_proxy().chat()
