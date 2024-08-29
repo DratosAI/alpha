@@ -3,8 +3,6 @@ from pydantic import Field
 from src.core.data.domain.base import (
     DomainObject,
     DomainFactory,
-    DomainSelector,
-    DomainObjectAccessor,
 )
 from api.config import Config
 

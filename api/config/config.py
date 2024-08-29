@@ -6,7 +6,7 @@ import httpx
 import daft
 import ray
 from openai import AsyncOpenAI
-from unitycatalog import AsyncUnityCatalog, DefaultHttpxClient
+from unitycatalog import AsyncUnitycatalog, DefaultHttpxClient
 import mlflow
 
 load_dotenv()
@@ -28,12 +28,12 @@ class Config:
             cls._instance = cls()
         return cls._instance
 
-    def unity_catalog(self) -> AsyncUnityCatalog:
+    def unity_catalog(self) -> AsyncUnitycatalog:
         if self._unity_catalog is None:
             UNITY_CATALOG_URL = os.environ.get("UNITY_CATALOG_URL")
             UNITY_CATALOG_TOKEN = os.environ.get("UNITY_CATALOG_TOKEN")
 
-            self._unity_catalog = AsyncUnityCatalog(
+            self._unity_catalog = AsyncUnitycatalog(
                 base_url=UNITY_CATALOG_URL,
                 token=UNITY_CATALOG_TOKEN,
                 timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
