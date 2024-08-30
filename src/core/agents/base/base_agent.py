@@ -6,7 +6,8 @@ from ray import serve
 from ray.serve.handle import DeploymentHandle, DeploymentResponse
 
 from src.core.data.prompts.prompt import Prompt
-from src.core.tools.base.tool import Tool
+from src.core.data.prompts.prompt_settings import PromptSettings
+from src.core.tools.base.tool import Tool, ToolTypes
 from src.core.data.domain.base.domain_object import DomainObject
 from src.core.models.language.base.llm import LLM
 from src.core.data.structs.messages.message import Message
@@ -23,56 +24,36 @@ class Agent(DomainObject):
     """
     The base agent class.
     """
-    def __init__(self):
-        name: Optional[str] = Field(
-            ...,
-            description="The name of the agent", 
-        ),
-        status: AgentStatus = Field(
-            default="Idle",
-            description="The status of the agent"
-        ),
-        llm: Optional[LLM] = Field(
-            default=LLM(),
-            description="The Multimodal Model"
-        ),
-        tools: Optional[List[Tool]] = Field(
-            default=None,
-            description="The tools that the agent can use"
-        )
-        is_async: Optional[bool] = Field(
-            default=False,
-            description="Use asynchrony (i.e. for streaming)."
-        )
+    name: str = Field(..., description="The name of the agent")
+    status: AgentStatus = Field(default="Idle", description="The status of the agent")
+    llm: LLM = Field(default=LLM(), description="The Multimodal Model")
+    tools: Optional[List[Tool]] = Field(default=None, description="The tools that the agent can use")
+    is_async: bool = Field(default=False, description="Use asynchrony (i.e. for streaming).")
+    prompt: Optional[Prompt] = Field(default=None, description="The prompt to use for the agent")
+    actions: Optional[List[str]] = Field(default=None, description="The actions that the agent can perform")
 
-        super().__init__()
-        self.name = name
-        self.llm = llm
-        self.tools = tools
-        self.status = status
-        self.is_async = is_async
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
     def __call__(self, prompt: Prompt, messages: List[Message]) -> str:
         """Chat with the model"""
         if self.is_async:
             
-            action = self.infer_action(prompt,self.actions,self.tools)
+            action = self.infer_action(prompt, self.actions, self.tools)
             tool = self.choose_tool(self.tools)
-            
 
             # TODO: Define Agent Prompt Template
 
             response = self.llm(
                 prompt=prompt,
                 messages=messages,
-                response_model=self.tools,
-                is_async=True
+                response_model=self.tools
             )
         else:
             response = self.llm(
                 prompt=prompt, 
-                messages = messages,
-                is_async = False
+                messages = messages
             )
 
         return response
@@ -80,7 +61,7 @@ class Agent(DomainObject):
     def get_status(self) -> AgentStatus:
         return self.status
     
-    def infer_action(self, prompt: Prompt, tools: List[Tool]) -> str:
+    def infer_action(self, prompt: Prompt, actions: List[str], tools: List[Tool]) -> str:
         """
         Infer the action to perform based on the prompt and tools.
         """
@@ -90,6 +71,12 @@ class Agent(DomainObject):
         """
         Choose the tool to use based on the tools.
         """
-        return tools[0]
+        # TODO: Implement tool selection logic
+        return Tool(
+            name="python",
+            desc="Python tool",
+            type=ToolTypes.python,
+            function=lambda x: x + 1
+        )
     
 __all__ = ["Agent"]

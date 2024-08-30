@@ -1,5 +1,7 @@
 from typing import Optional, List
 
+from pydantic import Field
+
 from api.config.config import Config
 from src.core.data.domain import DomainObject, DomainObjectAccessor, DomainObjectSelector
 from src.core.data.domain.base.domain_object import DomainObjectFactory
@@ -8,24 +10,24 @@ from src.core.data.prompts.prompt_settings import PromptSettings
 
 class SystemPrompt(DomainObject):
     """System prompt for a language model"""
+    name: str = Field(..., description="Name of the system prompt")
+    system_prompt: str = Field(..., description="System prompt for the prompt")
 
     __tablename__ = "system_prompts"
 
-    def __init__(self, name: str, system_prompt: str, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.name = name
-        self.system_prompt = system_prompt
 
 
 class UserPrompt(DomainObject):
     """User prompt for a language model"""
+    name: str = Field(..., description="Name of the user prompt")
+    user_prompt: str = Field(..., description="User prompt for the prompt")
 
     __tablename__ = "user_prompts"
 
-    def __init__(self, name: str, user_prompt: str, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.name = name
-        self.user_prompt = user_prompt
 
 
 class PromptSettingsFactory(DomainObjectFactory):
@@ -42,21 +44,28 @@ class PromptFactory(DomainObjectFactory):
 
 class Prompt(DomainObject):
     """Prompt for a language model"""
-
-    def __init__(
-        self,
-        name: str,
-        system_prompt: SystemPrompt,
-        user_prompt: UserPrompt,
-        settings: PromptSettings,
-        **kwargs
-    ):
-
+    name: str = Field(..., description="Name of the prompt")
+    system_prompt: SystemPrompt = Field(..., description="System prompt for the prompt")
+    user_prompt: UserPrompt = Field(..., description="User prompt for the prompt")
+    settings: PromptSettings = Field(..., description="Settings for the prompt")
+    
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.name = name
-        self.system_prompt = system_prompt
-        self.user_prompt = user_prompt
-        self.settings = settings
+
+    # def __init__(
+    #     self,
+    #     name: str,
+    #     system_prompt: SystemPrompt,
+    #     user_prompt: UserPrompt,
+    #     settings: PromptSettings,
+    #     **kwargs
+    # ):
+
+    #     super().__init__(**kwargs)
+    #     self.name = name
+    #     self.system_prompt = system_prompt
+    #     self.user_prompt = user_prompt
+    #     self.settings = settings
 
 
 class PromptSettingsSelector(DomainObjectSelector):
