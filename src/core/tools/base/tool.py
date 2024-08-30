@@ -28,21 +28,18 @@ class ToolTypes(str, Enum):
 # @ray.remote
 class Tool(DomainObject):
     """A Base Tool Class, used by Agents to perform actions"""
-
+    name: str = Field(default="General Pyfunc")
+    desc: Optional[str] = Field(default=None)
+    type: ToolTypes = Field(default=ToolTypes.python)
+    function: Union[str, Callable] = Field(default=None)
+    
     __tablename__ = "tools"
 
     def __init__(
         self,
-        name: str = Field(default="General Pyfunc"),
-        desc: Optional[str] = Field(default=None),
-        type: Optional[ToolTypes] = Field(default=ToolTypes.python),
-        function: Union[str, Callable] = Field(default=None),
+        **kwargs
     ):
-        super().__init__()
-        self.name = name
-        self.desc = desc
-        self.type = type
-        self.function = function
+        super().__init__(**kwargs)
 
     class Config:
         validate_assignment = True

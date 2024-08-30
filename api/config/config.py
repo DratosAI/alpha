@@ -68,19 +68,22 @@ class Config:
 
     def openai_proxy(
         self,
-        is_async: Optional[bool],
-        api_key: Optional[str] = os.environ.get("OPENAI_API_KEY"),
+        api_key: str = os.environ.get("OPENAI_API_KEY"),
+        is_async: Optional[bool] = True,
     ) -> AsyncOpenAI | OpenAI:
         if self._openai is None:
             LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE")
 
             if is_async:
                 self._openai = AsyncOpenAI(
-                    api_base=LITELLM_API_BASE,
-                    stream=True,
+                    api_key=api_key,
+                    base_url=LITELLM_API_BASE,
                 )
             else:
-                self._openai = OpenAI(api_base=LITELLM_API_BASE, stream=False)
+                self._openai = OpenAI(
+                    api_key=api_key,
+                    base_url=LITELLM_API_BASE,
+                )
         return self._openai
 
 

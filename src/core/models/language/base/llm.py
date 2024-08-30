@@ -1,5 +1,6 @@
+import os
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import Field
 from dotenv import load_dotenv
 from openai import OpenAI, AsyncOpenAI
 import mlflow
@@ -17,18 +18,22 @@ deployments.get_deploy_client()
 class LLM(DomainObject):
     """Base Multimodal Language Model that defines the interface for all language models"""
 
-    model_name: Optional[str] = Field(
+    model_name: str = Field(
         default="openai/gpt4o-mini",
         description="Name of the model in the form of a HuggingFace model name",
     )
-    prompt_settings: Optional[PromptSettings] = Field(
+    prompt_settings: PromptSettings = Field(
         default=None, description="Prompt settings to use for the model"
     )
     history: Optional[List[str]] = Field(
         default=[], description="History of messages"
     )
-    is_async: Optional[bool] = Field(
+    is_async: bool = Field(
         default=False, description="Whether to stream the output"
+    )
+    api_key: str = Field(
+        default=os.environ.get("OPENAI_API_KEY"),
+        description="API key to use for the model",
     )
 
     def __init__(self, **data):
@@ -65,24 +70,23 @@ class LLM(DomainObject):
         """Chat with the model"""
 
         client = self.get_client()
+        client.api_key = self.api_key
 
         mlflow.openai.autolog()
         response = client.chat.completions.create(
             model=self.model_name,
             messages=messages,
-            max_tokens=prompt.settings.max_tokens,
-            max_length=prompt.settings.max_length,
-            temperature=prompt.settings.temperature,
-            top_k=prompt.settings.top_k,
-            top_p=prompt.settings.top_p,
-            seed=prompt.settings.seed,
-            stop_token=prompt.settings.stop_token,
-            response_model=response_model,
+            max_tokens=self.prompt_settings.max_tokens,
+            temperature=self.prompt_settings.temperature,
+            top_p=self.prompt_settings.top_p,
+            seed=self.prompt_settings.seed,
             stream=self.is_async,
         )
         return response
 
     def get_client(self) -> OpenAI | AsyncOpenAI:
-        client = config.openai_proxy(is_async=self.is_async)
+        client = config.config.openai_proxy(
+            is_async=self.is_async, api_key=self.api_key
+        )
 
         return client
