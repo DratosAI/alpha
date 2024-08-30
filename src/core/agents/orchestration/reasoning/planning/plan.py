@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import List, Dict, Any
 from pydantic import Field
-from src.core.data.schema.base import DomainObject, User
+from src.core.data.domain.base import DomainObject, User
 
 
 class PlanStep(DomainObject):

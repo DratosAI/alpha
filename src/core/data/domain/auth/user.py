@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pydantic import EmailStr, Field
 from src.core.data.domain.base import DomainObject, DomainObjectFactory, DomainObjectSelector, DomainObjectAccessor
-from api.config import Config
+from api.config.config import Config
 
 class User(DomainObject):
     account_id: str = Field(..., description="Account ID associated with the user")

@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import Field
-from src.core.data.schema.base import DomainObject, DomainFactory, DomainSelector, DomainObjectAccessor
-from api.config import get_config
+from src.core.data.domain.base import DomainObject, DomainObjectFactory, DomainObjectSelector, DomainObjectAccessor
+from api.config.config import Config
 from datetime import datetime
 
 class UserSession(DomainObject):
@@ -12,7 +12,7 @@ class UserSession(DomainObject):
     class Meta:
         type: str = "UserSession"
 
-class UserSessionFactory(DomainFactory[UserSession]):
+class UserSessionFactory(DomainObjectFactory[UserSession]):
     @staticmethod
     def create_new_session(user_id: str, token: str, expires_at: datetime) -> UserSession:
         return UserSession.create_new(
@@ -21,7 +21,7 @@ class UserSessionFactory(DomainFactory[UserSession]):
             expires_at=expires_at
         )
 
-class UserSessionSelector(DomainSelector):
+class UserSessionSelector(DomainObjectSelector):
     @staticmethod
     def by_token(token: str) -> str:
         return f"{UserSessionSelector.base_query('user_sessions')} WHERE token = '{token}'"

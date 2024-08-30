@@ -1,5 +1,5 @@
 from typing import Dict, Type, Optional
-from src.core.data.schema.base.domain_object import DomainObject, DomainObjectAccessor
+from src.core.data.domain.base.domain_object import DomainObject, DomainObjectAccessor
 
 class DomainObjectRegistry:
     _instance: Optional['DomainObjectRegistry'] = None

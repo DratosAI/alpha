@@ -1,3 +1,8 @@
+from typing import Optional, List
+from pydantic import Field
+from src.core.data.domain.base import DomainObject
+
+
 class Project(DomainObject):
     """
     This is a generic Project class for organizing tasks.
