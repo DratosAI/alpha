@@ -2,6 +2,7 @@
 from .auth import account, session, user
 from .projects import experiment, project, task
 from .base import DomainObject, DomainObjectFactory, DomainObjectSelector, DomainObjectAccessor
+from src.core.data.structs.artifacts.artifact import Artifact, ArtifactAccessor, ArtifactError, ArtifactFactory, ArtifactSelector
 
 __all__ = [
     "account",
@@ -14,4 +15,10 @@ __all__ = [
     "DomainObjectFactory",
     "DomainObjectSelector",
     "DomainObjectAccessor",
+    "Artifact",
+    "ArtifactAccessor",
+    "ArtifactError",
+    "ArtifactFactory",
+    "ArtifactSelector",
 ]
+

@@ -1,4 +1,4 @@
-from typing import Dict, Type, Optional
+from typing import Dict, List, Type, Optional
 from src.core.data.domain.base.domain_object import DomainObject, DomainObjectAccessor
 
 class DomainObjectRegistry:

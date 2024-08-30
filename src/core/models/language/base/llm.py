@@ -1,16 +1,10 @@
 from typing import List, Optional
 from pydantic import Field
 from dotenv import load_dotenv
-import os
-import asyncio
-
 from openai import OpenAI, AsyncOpenAI
 import mlflow
 from mlflow import deployments
-from starlette import Request, Response
-
-
-from src.core.data.domain.base import DomainObject, DomainObjectError
+from src.core.data.domain.base import DomainObject
 from src.core.data.prompts import Prompt, PromptSettings
 from src.core.data.structs.messages import Message
 from api.config import config

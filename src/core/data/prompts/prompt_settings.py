@@ -4,8 +4,6 @@ from src.core.data.domain.base import (
     DomainObject,
     DomainObjectFactory,
 )
-from api.config import Config
-
 
 class PromptSettings(DomainObject):
     """Prompt Settings for a language model serving"""
@@ -53,3 +51,5 @@ class PromptSettingsFactory(DomainObjectFactory[PromptSettings]):
             seed=seed,
             stop_token=stop_token,
         )
+
+__all__ = ['PromptSettings', 'PromptSettingsFactory']

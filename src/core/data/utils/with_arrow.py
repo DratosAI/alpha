@@ -44,7 +44,7 @@ def with_arrow(cls):
                 Dict[str, Any]: pa.map_(pa.string(), pa.string()),
                 List[Any]: pa.list_(pa.string()),
                 uuid.UUID: pa.string(),
-                ulid.ULID: pa.string(),
+                ulid.ulid: pa.string(),
                 HttpUrl: pa.string(),
                 EmailStr: pa.string(),
                 PhoneNumber: pa.string(),
@@ -65,7 +65,7 @@ def with_arrow(cls):
                     
                     if isinstance(field_value, (dict, list)):
                         arrays.append(pa.array([json.dumps(field_value)]))
-                    elif isinstance(field_value, (datetime, date, time, uuid.UUID, ulid.ULID, HttpUrl, EmailStr, PhoneNumber)):
+                    elif isinstance(field_value, (datetime, date, time, uuid.UUID, ulid.ulid, HttpUrl, EmailStr, PhoneNumber)):
                         arrays.append(pa.array([str(field_value)]))
                     else:
                         arrays.append(pa.array([field_value]))

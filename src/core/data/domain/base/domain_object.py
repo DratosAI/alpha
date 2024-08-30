@@ -1,7 +1,7 @@
 from typing import TypeVar, Type, Dict, Any, List, Optional, ClassVar, Generic
 from pydantic import BaseModel, Field
 import ulid
-from datetime import datetime
+from datetime import datetime, timedelta
 import daft
 import importlib
 import inspect
@@ -130,7 +130,7 @@ class DomainObjectAccessor:
         df = config.daft().sql(query)
         objects_df = df.collect()
         return [
-            DomainObjectFactory.create_from_data(data, object_type) for data in objects_data
+            DomainObjectFactory.create_from_data(data, object_type) for data in objects_df
         ]
 
     async def create(self, table_name: str, object_type: str, **data) -> T:
