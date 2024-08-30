@@ -1,7 +1,7 @@
 from typing import TypeVar, Type, Dict, Any, List, Optional, ClassVar, Generic
 from pydantic import BaseModel, Field
 import ulid
-from datetime import datetime
+from datetime import datetime, timedelta
 import daft
 import importlib
 import inspect
@@ -22,7 +22,7 @@ class DomainObject(BaseModel):
     __tablename__ = "domain"
 
     id: str = Field(
-        default_factory=lambda: ulid.new().str, description="ULID Unique identifier"
+        default_factory=lambda: ulid.ulid().str, description="ULID Unique identifier"
     )
     updated_at: Optional[datetime] = Field(
         default=None, description="UTC timestamp of last update"
@@ -80,11 +80,11 @@ class DomainObjectSelector:
 
     @staticmethod
     def by_id(table_name: str, id: str) -> str:
-        return f"{DomainSelector.base_query(table_name)} WHERE id = '{id}'"
+        return f"{DomainObjectSelector.base_query(table_name)} WHERE id = '{id}'"
 
     @staticmethod
     def build_query(table_name: str, conditions: List[str] = None) -> str:
-        query = DomainSelector.base_query(table_name)
+        query = DomainObjectSelector.base_query(table_name)
         if conditions:
             where_clause = " AND ".join(conditions)
             query += f" WHERE {where_clause}"
@@ -126,15 +126,15 @@ class DomainObjectAccessor:
     async def query(
         self, table_name: str, object_type: str, conditions: List[str] = None
     ) -> List[T]:
-        query = DomainSelector.build_query(table_name, conditions)
+        query = DomainObjectSelector.build_query(table_name, conditions)
         df = config.daft().sql(query)
         objects_df = df.collect()
         return [
-            DomainFactory.create_from_data(data, object_type) for data in objects_data
+            DomainObjectFactory.create_from_data(data, object_type) for data in objects_df
         ]
 
     async def create(self, table_name: str, object_type: str, **data) -> T:
-        new_object = DomainFactory.create_new(object_type, **data)
+        new_object = DomainObjectFactory.create_new(object_type, **data)
         # Implement Iceberg table insertion logic here
         return new_object
 

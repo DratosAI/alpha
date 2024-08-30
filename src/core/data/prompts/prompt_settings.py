@@ -2,10 +2,8 @@ from typing import Optional, List, Any
 from pydantic import Field
 from src.core.data.domain.base import (
     DomainObject,
-    DomainFactory,
+    DomainObjectFactory,
 )
-from api.config import Config
-
 
 class PromptSettings(DomainObject):
     """Prompt Settings for a language model serving"""
@@ -33,7 +31,7 @@ class PromptSettings(DomainObject):
         type: str = "PromptSettings"
 
 
-class PromptSettingsFactory(DomainFactory[PromptSettings]):
+class PromptSettingsFactory(DomainObjectFactory[PromptSettings]):
     @staticmethod
     def create_new_prompt(
         max_tokens: Optional[int] = None,
@@ -53,3 +51,5 @@ class PromptSettingsFactory(DomainFactory[PromptSettings]):
             seed=seed,
             stop_token=stop_token,
         )
+
+__all__ = ['PromptSettings', 'PromptSettingsFactory']

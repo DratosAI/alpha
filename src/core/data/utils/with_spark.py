@@ -49,7 +49,7 @@ def with_spark(use_arrow: bool = False):
                         # Fallback to direct conversion
                         data = self.dict()
                         for key, value in data.items():
-                            if isinstance(value, (datetime, date, time, uuid.UUID, ulid.ULID, EmailStr, PhoneNumber)):
+                            if isinstance(value, (datetime, date, time, uuid.UUID, ulid.ulid, EmailStr, PhoneNumber)):
                                 data[key] = str(value)
                             elif isinstance(value, (dict, list)):
                                 data[key] = json.dumps(value)

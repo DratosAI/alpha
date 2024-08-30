@@ -1,48 +1,60 @@
 from typing import List, Optional
-from pydantic import Field
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-import os
-import asyncio
-
 from openai import OpenAI, AsyncOpenAI
 import mlflow
 from mlflow import deployments
-from starlette import Request, Response
-
-
-from src.core.data.domain.base import DomainObject, DomainObjectError
+from src.core.data.domain.base import DomainObject
 from src.core.data.prompts import Prompt, PromptSettings
 from src.core.data.structs.messages import Message
 from api.config import config
 
-deployments.get_client()
 load_dotenv()
+
+deployments.get_deploy_client()
 
 
 class LLM(DomainObject):
     """Base Multimodal Language Model that defines the interface for all language models"""
 
-    def __init__(
-        self,
-        model_name: Optional[str] = Field(
-            default="openai/gpt4o-mini",
-            description="Name of the model in the form of a HuggingFace model name",
-        ),
-        prompt_settings: Optional[PromptSettings] = Field(
-            default=None, description="Prompt settings to use for the model"
-        ),
-        history: Optional[List[str]] = Field(
-            default=[], description="History of messages"
-        ),
-        is_async: Optional[bool] = Field(
-            default=False, description="Whether to stream the output"
-        ),
-    ):
-        self.super().__init__()
-        self.model_name = model_name
-        self.prompt_settings = prompt_settings
-        self.history = history
-        self.is_async = is_async
+    model_name: Optional[str] = Field(
+        default="openai/gpt4o-mini",
+        description="Name of the model in the form of a HuggingFace model name",
+    )
+    prompt_settings: Optional[PromptSettings] = Field(
+        default=None, description="Prompt settings to use for the model"
+    )
+    history: Optional[List[str]] = Field(
+        default=[], description="History of messages"
+    )
+    is_async: Optional[bool] = Field(
+        default=False, description="Whether to stream the output"
+    )
+
+    def __init__(self, **data):
+        super().__init__(**data)  # Corrected this line
+
+    # def __init__(
+    #     self,
+    #     model_name: Optional[str] = Field(
+    #         default="openai/gpt4o-mini",
+    #         description="Name of the model in the form of a HuggingFace model name",
+    #     ),
+    #     prompt_settings: Optional[PromptSettings] = Field(
+    #         default=None, description="Prompt settings to use for the model"
+    #     ),
+    #     history: Optional[List[str]] = Field(
+    #         default=[], description="History of messages"
+    #     ),
+    #     is_async: Optional[bool] = Field(
+    #         default=False, description="Whether to stream the output"
+    #     ),
+    # ):
+    #     super().__init__()  # Corrected this line
+    #     self.model_name = model_name
+    #     self.prompt_settings = prompt_settings
+    #     self.history = history
+    #     self.is_async = is_async
 
     def __call__(
         self,

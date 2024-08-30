@@ -1,9 +1,9 @@
 from typing import Optional, List
 
 from api.config.config import Config
-from src.core.data.domain import DomainObject, DomainObjectAccessor, DomainSelector
+from src.core.data.domain import DomainObject, DomainObjectAccessor, DomainObjectSelector
 from src.core.data.domain.base.domain_object import DomainObjectFactory
-from src.core.data.prompts import PromptSettings
+from src.core.data.prompts.prompt_settings import PromptSettings
 
 
 class SystemPrompt(DomainObject):
@@ -59,7 +59,7 @@ class Prompt(DomainObject):
         self.settings = settings
 
 
-class PromptSettingsSelector(DomainSelector):
+class PromptSettingsSelector(DomainObjectSelector):
     @staticmethod
     def by_name(name: str) -> str:
         return f"{PromptSettingsSelector.base_query('prompt_settings')} WHERE name = '{name}'"
@@ -103,3 +103,14 @@ class PromptAccessor(DomainObjectAccessor):
         # Here you would typically delete the prompt from the Iceberg table
         # For this example, we'll just return True
         return await self.delete("prompts", prompt_id, "Prompt")
+
+__all__ = [
+    "Prompt",
+    "PromptAccessor",
+    "UserPrompt",
+    "SystemPrompt",
+    "PromptFactory",
+    "PromptAccessor",
+    "PromptSettingsFactory",
+    "PromptSettingsSelector",
+]

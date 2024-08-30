@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import Field
-from src.core.data.schema.base import DomainObject, DomainFactory, DomainSelector, DomainObjectAccessor
-from api.config import Config
+from src.core.data.domain.base import DomainObject, DomainObjectFactory, DomainObjectSelector, DomainObjectAccessor
+from api.config.config import Config
 
 class Account(DomainObject):
     name: str = Field(..., description="Account name")
@@ -11,7 +11,7 @@ class Account(DomainObject):
     class Meta:
         type: str = "Account"
 
-class AccountFactory(DomainFactory[Account]):
+class AccountFactory(DomainObjectFactory[Account]):
     @staticmethod
     def create_new_account(name: str, owner_id: str) -> Account:
         return Account.create_new(
@@ -19,7 +19,7 @@ class AccountFactory(DomainFactory[Account]):
             owner_id=owner_id
         )
 
-class AccountSelector(DomainSelector):
+class AccountSelector(DomainObjectSelector):
     @staticmethod
     def by_owner_id(owner_id: str) -> str:
         return f"{AccountSelector.base_query('accounts')} WHERE owner_id = '{owner_id}'"

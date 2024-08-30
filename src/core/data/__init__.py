@@ -7,6 +7,7 @@ from .prompts.prompt import (
     PromptSettingsFactory,
     PromptSettingsSelector,
 )
+from .structs.artifacts.artifact import Artifact, ArtifactAccessor, ArtifactError, ArtifactFactory, ArtifactSelector
 
 __all__ = [
     "DomainObject",
@@ -18,4 +19,9 @@ __all__ = [
     "PromptFactory",
     "PromptSettingsFactory",
     "PromptSettingsSelector",
+    "Artifact",
+    "ArtifactAccessor",
+    "ArtifactError",
+    "ArtifactFactory",
+    "ArtifactSelector",
 ]

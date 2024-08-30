@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
-from src.core.data.schema.base import DomainObject, User
+from src.core.data.domain.base import DomainObject, User
 class BasePlanner(DomainObject):
     @abstractmethod
     def plan(self, context: Dict[str, Any], goals: List[str]) -> Plan:

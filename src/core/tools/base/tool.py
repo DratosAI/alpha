@@ -1,6 +1,7 @@
 from typing import Callable, Optional, List, Union
 from pydantic import Field
-from starlette import Request, Response
+from starlette.requests import Request
+from starlette.responses import Response
 import ray
 import daft
 from api.config import config
@@ -14,13 +15,17 @@ from src.core.data.domain.base.domain_object import (
 
 from enum import Enum
 
+import unittest
+import asyncio
+from unittest.mock import patch, AsyncMock
+
 
 class ToolTypes(str, Enum):
     python = "python"
     sql = "sql"
 
 
-@ray.remote
+# @ray.remote
 class Tool(DomainObject):
     """A Base Tool Class, used by Agents to perform actions"""
 
@@ -28,10 +33,10 @@ class Tool(DomainObject):
 
     def __init__(
         self,
-        name: str = "General Pyfunc",
-        desc: Optional[str] = None,
-        type: Optional[ToolTypes] = "python",
-        function: Union[str, Callable] = None,
+        name: str = Field(default="General Pyfunc"),
+        desc: Optional[str] = Field(default=None),
+        type: Optional[ToolTypes] = Field(default=ToolTypes.python),
+        function: Union[str, Callable] = Field(default=None),
     ):
         super().__init__()
         self.name = name
@@ -149,12 +154,6 @@ class ToolAccessor(DomainObjectAccessor):
         return df.where(df["_type"] == Tool.type).where(
             df["name"].str.contains(keyword) | df["desc"].str.contains(keyword)
         )
-
-
-import unittest
-import asyncio
-from unittest.mock import patch, AsyncMock
-from src.core.tools.base.tool import Tool, ToolAccessor
 
 
 class TestToolUsage(unittest.TestCase):

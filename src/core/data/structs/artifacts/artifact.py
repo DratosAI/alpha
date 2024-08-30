@@ -2,13 +2,13 @@ import gzip
 import hashlib
 import mimetypes
 import uuid
-from datetime import datetime
+from datetime import datetime, date, time
+from src.core.data.domain.base import DomainObject
 from enum import Enum
 from typing import Optional
 
 import ulid
-from core.data.domain import DomainObject
-from pydantic import Field, HttpUrl
+from pydantic import Field, HttpUrl, field_validator
 import pyarrow as pa
 
 class SensitivityLevel(int, Enum):
@@ -85,43 +85,43 @@ class Artifact(DomainObject):
     """
 
     def __init__(self,
-        filename: pa.string() = Field(
+        filename: str = Field(
              ...,
              description="Name of the artifact",
              example="Q2 Financial Report.pdf",
              max_length=255
          ),
-        payload: Optional[pa.large_binary()] = Field(
+        payload: Optional[bytes] = Field(
             None,
             description="The artifact object payload, always gzipped",
             example=b"[gzipped content]"
         ),
-        extension: pa.string() = Field(
+        extension: str = Field(
             ...,
             description="File extension of the artifact.",
             example="pdf"
         ),
-        mime_type: pa.string() = Field(
+        mime_type: str = Field(
             ...,
             description="MIME type of the artifact",
             example="application/pdf"
         ),
-        version: pa.uint8() = Field(
+        version: int = Field(
             default=1,
             description="Version of the artifact",
             example=1
         ),
-        size_bytes: pa.uint64() = Field(
+        size_bytes: float = Field(
             ...,
             description="Size of the artifact in bytes",
             example=1048576
         ),
-        checksum: pa.string() = Field(
+        checksum: str = Field(
             ...,
             description="MD5 checksum of the artifact payload",
             example="d41d8cd98f00b204e9800998ecf8427e"
         ),
-        session_id: ulid.ULID = Field(
+        session_id: ulid.ulid = Field(
             ...,
             description="Unique identifier of the user session during which this artifact was created or last modified",
             example="abcdef12-3456-7890-abcd-ef1234567890"
@@ -157,14 +157,31 @@ class Artifact(DomainObject):
             description="ULID Unique identifier for the corresponding context event that triggered the upload of the artifact.",
             example="01F8MECHZCP3QV1Z4T5BA4WJXN"
         ),
-        self.artifact_uri: HttpUrl = Field(
+        artifact_uri: HttpUrl = Field(
             ...,
             description="URI where the artifact is stored",
             example="gs://your-bucket/artifacts/account_id/user_id/q2_financial_report.pdf.gz"
         )
-):
+    ):
+        self.file_name = filename
+        self.payload = payload
+        self.extension = extension
+        self.mime_type = mime_type
+        self.version = version
+        self.size_bytes = size_bytes
+        self.checksum = checksum
+        self.session_id = session_id
+        self.account_id = account_id
+        self.user_id = user_id
+        self.region_id = region_id
+        self.is_ai_generated = is_ai_generated
+        self.sensitivity_level = sensitivity_level
+        self.context_event_id = context_event_id
+        self.artifact_uri = artifact_uri
 
-    @validator('mime_type', pre=True, always=True)
+
+    @field_validator('mime_type', mode='before', check_fields=False)
+    @classmethod
     def set_mime_type(cls, v, values):
         if v:
             return v
@@ -173,9 +190,10 @@ class Artifact(DomainObject):
             mime_type, _ = mimetypes.guess_type(f"file.{ext}")
             if mime_type:
                 return mime_type
-        raise ValueError("Unable to determine MIME type")
+            raise ValueError("Unable to determine MIME type")
 
-    @validator('checksum', pre=True, always=True)
+    @field_validator('checksum', mode='before', check_fields=False)
+    @classmethod
     def set_checksum(cls, v, values):
         if v:
             return v
@@ -204,7 +222,6 @@ class Artifact(DomainObject):
     @classmethod
     def from_file(cls,
                   file_path: str,
-                  session: Session,
                   is_ai_generated: Optional[bool] = False,
                   **kwargs):
         with open(file_path, 'rb') as file:
@@ -227,32 +244,50 @@ class Artifact(DomainObject):
         )
 
     def persist(self):
-
-    # Write Payload to Object Store
+        # Write Payload to Object Store using Apache Arrow
+        with pa.ipc.open_stream(self.payload, self.artifact_uri) as sink:
+            sink.write(self.payload)
+        # Write Metadata to Metadata Store
+        with pa.ipc.open_stream(self.metadata, self.artifact_uri) as sink:
+            sink.write(self.metadata)
+        # Return Artifact
+        return self.artifact_uri
 
     def __repr__(self):
         return f"<Artifact {self.file_name}.{self.extension} ({self.mime_type})>"
 
     def __str__(self):
         return
-
-    class Config:
-        json_encoders = {
+    
+    # If using Pydantic v2, replace Config with model_config
+    model_config = {
+        "json_encoders": {
             datetime: lambda v: v.isoformat(),
             date: lambda v: v.isoformat(),
             time: lambda v: v.isoformat(),
             bytes: lambda v: v.decode('utf-8', errors='ignore'),
-            uuid.UUID: str,
-            ulid.ULID: str,
-        }
-        allow_population_by_field_name = True
-        use_enum_values = True
-        validate_assignment = True
+        },
+        "allow_population_by_field_name": True,
+        "use_enum_values": True,
+        "validate_assignment": True,
+    }
 
 
 
-class ArtifactFactory(DomainObject)
+class ArtifactFactory(DomainObject):
+    def create_artifact(self, **kwargs):
+        return Artifact(**kwargs)
 
-class ArtifactSelector
+class ArtifactSelector(DomainObject):
+    def select_artifact(self, **kwargs):
+        return Artifact(**kwargs)
 
-class ArtifactAccessor
+class ArtifactAccessor(DomainObject):
+    def access_artifact(self, **kwargs):
+        return Artifact(**kwargs)
+
+class ArtifactMutator(DomainObject):
+    def mutate_artifact(self, **kwargs):
+        return Artifact(**kwargs)
+
+__all__ = ['Artifact', 'ArtifactFactory', 'ArtifactSelector', 'ArtifactAccessor', 'ArtifactMutator']
