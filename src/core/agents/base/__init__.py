@@ -1,6 +1,5 @@
 from .base_agent import Agent
-from .statelessAgent import StatelessAgent
-from .df_agent import StatefulAgent
+from .df_agent import DataFrameAgent
 
 
 __all__ = ["Agent", "StatelessAgent", "StatefulAgent"]

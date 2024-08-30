@@ -9,7 +9,7 @@ from src.core.data.prompts.prompt import Prompt
 from src.core.tools.base.tool import Tool
 from src.core.data.domain.base.domain_object import DomainObject
 from src.core.models.language.base.llm import LLM
-
+from src.core.data.structs.messages.message import Message
 
 class AgentStatus(str, Enum):
     IDLE = "idle"
@@ -52,40 +52,28 @@ class Agent(DomainObject):
         self.status = status
         self.is_async = is_async
 
-    def __call__(self, prompt: Prompt):
-        response = 
-        return response
-
-    def __call__(self, prompt: Prompt, messages: Messages) -> str:
+    def __call__(self, prompt: Prompt, messages: List[Message]) -> str:
         """Chat with the model"""
         if self.is_async:
-            return self.__async_call__(
-                prompt=prompt, 
-                messages = messages,
+            
+            action = infer_action(prompt,self.actions,self.tools)
+            tool = choose_tool(self.tools)
+            
+
+            # TODO: Define Agent Prompt Template 
+
+            response = self.llm(
+                prompt: prompt,
+                messages: messages,
+                response_model: self.tools,
                 is_async = True
-        )
+            )
+             
         else:
-            return self.__sync_call__(
+            return self.llm(
                 prompt=prompt, 
                 messages = messages,
                 is_async = False
-        )
-
-    def __sync_call__(self, prompt: Prompt) -> str:
-        """Chat with the model"""
-        response = self.llm.chat(prompt=prompt, 
-                            messages = messages,
-                            is_async = False
-        )
-        return response
-
-
-    async def __async_call__(self, prompt: Prompt, messages: Messages ) -> str:
-        """Chat with the model"""
-
-        await self.llm.chat(prompt=prompt, 
-                            messages = messages,
-                            is_async = True
         )
 
     def get_status(self) -> AgentStatus:
