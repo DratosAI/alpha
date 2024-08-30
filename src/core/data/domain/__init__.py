@@ -1,6 +1,7 @@
 # from admin import *
 from .auth import account, session, user
 from .projects import experiment, project, task
+from .base import DomainObject, DomainObjectFactory, DomainObjectSelector, DomainObjectAccessor
 
 __all__ = [
     "account",
@@ -9,4 +10,8 @@ __all__ = [
     "project",
     "task",
     "experiment",
+    "DomainObject",
+    "DomainObjectFactory",
+    "DomainObjectSelector",
+    "DomainObjectAccessor",
 ]

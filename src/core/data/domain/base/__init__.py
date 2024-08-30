@@ -1,15 +1,17 @@
-from domain_object import (
-    DomainFactory,
+from .domain_object import (
+    DomainObjectFactory,
     DomainObject,
     DomainObjectError,
     DomainObjectAccessor,
     ULIDValidationError,
+    DomainObjectSelector,
 )
 
 __all__ = [
-    "DomainFactory",
+    "DomainObjectFactory",
     "DomainObject",
     "DomainObjectError",
     "DomainObjectAccessor",
     "ULIDValidationError",
+    "DomainObjectSelector",
 ]

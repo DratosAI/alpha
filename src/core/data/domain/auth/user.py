@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import EmailStr, Field
-from src.core.data.schema.base import DomainObject, DomainFactory, DomainSelector, DomainObjectAccessor
+from src.core.data.domain.base import DomainObject, DomainObjectFactory, DomainObjectSelector, DomainObjectAccessor
 from api.config import Config
 
 class User(DomainObject):
@@ -13,7 +13,7 @@ class User(DomainObject):
     class Meta:
         type: str = "User"
 
-class UserFactory(DomainFactory[User]):
+class UserFactory(DomainObjectFactory[User]):
     @staticmethod
     def create_new_user(account_id: str, project_id: str, email: str, name: str) -> User:
         return User.create_new(
@@ -23,7 +23,7 @@ class UserFactory(DomainFactory[User]):
             name=name
         )
 
-class UserSelector(DomainSelector):
+class UserSelector(DomainObjectSelector):
     @staticmethod
     def by_email(email: str) -> str:
         return f"{UserSelector.base_query('users')} WHERE email = '{email}'"
