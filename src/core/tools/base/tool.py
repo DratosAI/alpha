@@ -1,4 +1,5 @@
 from typing import Callable, Optional, List, Union
+from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import Response
 import ray
@@ -24,7 +25,7 @@ class ToolTypes(str, Enum):
     sql = "sql"
 
 
-@ray.remote
+# @ray.remote
 class Tool(DomainObject):
     """A Base Tool Class, used by Agents to perform actions"""
 
@@ -32,10 +33,10 @@ class Tool(DomainObject):
 
     def __init__(
         self,
-        name: str = "General Pyfunc",
-        desc: Optional[str] = None,
-        type: Optional[ToolTypes] = "python",
-        function: Union[str, Callable] = None,
+        name: str = Field(default="General Pyfunc"),
+        desc: Optional[str] = Field(default=None),
+        type: Optional[ToolTypes] = Field(default=ToolTypes.python),
+        function: Union[str, Callable] = Field(default=None),
     ):
         super().__init__()
         self.name = name

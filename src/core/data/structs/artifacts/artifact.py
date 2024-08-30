@@ -85,38 +85,38 @@ class Artifact(DomainObject):
     """
 
     def __init__(self,
-        filename: pa.string = Field(
+        filename: str = Field(
              ...,
              description="Name of the artifact",
              example="Q2 Financial Report.pdf",
              max_length=255
          ),
-        payload: Optional[pa.large_binary] = Field(
+        payload: Optional[bytes] = Field(
             None,
             description="The artifact object payload, always gzipped",
             example=b"[gzipped content]"
         ),
-        extension: pa.string = Field(
+        extension: str = Field(
             ...,
             description="File extension of the artifact.",
             example="pdf"
         ),
-        mime_type: pa.string = Field(
+        mime_type: str = Field(
             ...,
             description="MIME type of the artifact",
             example="application/pdf"
         ),
-        version: pa.uint8 = Field(
+        version: int = Field(
             default=1,
             description="Version of the artifact",
             example=1
         ),
-        size_bytes: pa.uint64 = Field(
+        size_bytes: float = Field(
             ...,
             description="Size of the artifact in bytes",
             example=1048576
         ),
-        checksum: pa.string = Field(
+        checksum: str = Field(
             ...,
             description="MD5 checksum of the artifact payload",
             example="d41d8cd98f00b204e9800998ecf8427e"
@@ -258,19 +258,19 @@ class Artifact(DomainObject):
 
     def __str__(self):
         return
-
-    class Config:
-        json_encoders = {
+    
+    # If using Pydantic v2, replace Config with model_config
+    model_config = {
+        "json_encoders": {
             datetime: lambda v: v.isoformat(),
             date: lambda v: v.isoformat(),
             time: lambda v: v.isoformat(),
             bytes: lambda v: v.decode('utf-8', errors='ignore'),
-            uuid.UUID: str,
-            ulid.ulid: str,
-        }
-        allow_population_by_field_name = True
-        use_enum_values = True
-        validate_assignment = True
+        },
+        "allow_population_by_field_name": True,
+        "use_enum_values": True,
+        "validate_assignment": True,
+    }
 
 
 

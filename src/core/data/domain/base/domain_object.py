@@ -22,7 +22,7 @@ class DomainObject(BaseModel):
     __tablename__ = "domain"
 
     id: str = Field(
-        default_factory=lambda: ulid.new().str, description="ULID Unique identifier"
+        default_factory=lambda: ulid.ulid().str, description="ULID Unique identifier"
     )
     updated_at: Optional[datetime] = Field(
         default=None, description="UTC timestamp of last update"

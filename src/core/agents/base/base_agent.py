@@ -18,7 +18,7 @@ class AgentStatus(str, Enum):
     PROCESSING = "processing"
 
 
-@serve.deployment
+# @serve.deployment
 class Agent(DomainObject):
     """
     The base agent class.
@@ -56,25 +56,40 @@ class Agent(DomainObject):
         """Chat with the model"""
         if self.is_async:
             
-            action = infer_action(prompt,self.actions,self.tools)
-            tool = choose_tool(self.tools)
+            action = self.infer_action(prompt,self.actions,self.tools)
+            tool = self.choose_tool(self.tools)
             
 
-            # TODO: Define Agent Prompt Template 
+            # TODO: Define Agent Prompt Template
 
             response = self.llm(
-                prompt: prompt,
-                messages: messages,
-                response_model: self.tools,
-                is_async = True
+                prompt=prompt,
+                messages=messages,
+                response_model=self.tools,
+                is_async=True
             )
-             
         else:
-            return self.llm(
+            response = self.llm(
                 prompt=prompt, 
                 messages = messages,
                 is_async = False
-        )
+            )
+
+        return response
 
     def get_status(self) -> AgentStatus:
         return self.status
+    
+    def infer_action(self, prompt: Prompt, tools: List[Tool]) -> str:
+        """
+        Infer the action to perform based on the prompt and tools.
+        """
+        return "python"
+    
+    def choose_tool(self, tools: List[Tool]) -> Tool:
+        """
+        Choose the tool to use based on the tools.
+        """
+        return tools[0]
+    
+__all__ = ["Agent"]
