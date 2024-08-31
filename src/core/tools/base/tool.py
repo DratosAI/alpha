@@ -25,61 +25,22 @@ class ToolTypes(str, Enum):
     sql = "sql"
 
 
-# @ray.remote
 class Tool(DomainObject):
     """A Base Tool Class, used by Agents to perform actions"""
-    name: str = Field(default="General Pyfunc")
+    name: Optional[str] = Field(default="General Pyfunc")
     desc: Optional[str] = Field(default=None)
     type: ToolTypes = Field(default=ToolTypes.python)
     function: Union[str, Callable] = Field(default=None)
-    
-    __tablename__ = "tools"
 
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super().__init__(**kwargs)
+    __tablename__ = "tools"
 
     class Config:
         validate_assignment = True
 
-    @classmethod
-    def create_sql_tool(cls, name: str, desc: Optional[str], sql_query: str):
-        return cls(name=name, desc=desc, type="SQL", function=sql_query)
-
-    @classmethod
-    def create_python_tool(cls, name: str, desc: Optional[str], function: Callable):
-        return cls(name=name, desc=desc, type="Python", function=function)
-
     # TODO: Implement resource handler
-    # @daft.udf(num_cpus=resource_handler)
-    def __call__(self, request: Request) -> Response:
-        if self.tool_type == "SQL":
-            return self._execute_sql(request)
-        elif self.tool_type == "Python":
-            return self._execute_python(request)
-        else:
-            raise ValueError(f"Unsupported tool type: {self.tool_type}")
-
-    def _execute_sql(self, request: Request) -> Response:
-        try:
-            df = daft.sql(self.func)
-            return df
-        except Exception as e:
-            return e
-
-    def _execute_python(self, request: Request) -> Response:
-        try:
-            result = self.func(request)
-            if isinstance(result, daft.DataFrame):
-                return Response(
-                    content=result.to_pandas().to_json(), media_type="application/json"
-                )
-            else:
-                return Response(content=str(result), media_type="text/plain")
-        except Exception as e:
-            return e
+    def __call__(self, *args, **kwargs):
+        result = self.function(*args, **kwargs)
+        return result
 
     def __str__(self):
         return f"{self.name} ({self.tool_type}): {self.desc}"

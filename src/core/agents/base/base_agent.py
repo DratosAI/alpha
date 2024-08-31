@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 from typing import List, Optional
 import daft
@@ -35,28 +36,14 @@ class Agent(DomainObject):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
     def __call__(self, prompt: Prompt, messages: List[Message]) -> str:
-        """Chat with the model"""
-        if self.is_async:
-            
-            action = self.infer_action(prompt, self.actions, self.tools)
-            tool = self.choose_tool(self.tools)
+        tool = self.tools[0] if self.tools else None
 
-            # TODO: Define Agent Prompt Template
-
-            response = self.llm(
+        return self.llm(
                 prompt=prompt,
                 messages=messages,
-                response_model=self.tools
+                response_model=tool,
             )
-        else:
-            response = self.llm(
-                prompt=prompt, 
-                messages = messages
-            )
-
-        return response
 
     def get_status(self) -> AgentStatus:
         return self.status

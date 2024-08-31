@@ -15,6 +15,8 @@ from typing import List, Optional
 import daft
 from datetime import datetime
 
+from src.core.data.structs.messages.message import Message
+
 
 router = APIRouter()
 app = FastAPI("Dratos Chat API")
@@ -27,13 +29,13 @@ async def get_chats():
 
 
 @app.post("/messages", response_model=str)
-async def create_message(message: MessageCreate):
+async def create_message(message: Message):
     message_id = ray.get(chat_app.new_message.remote(message))
     return message_id
 
 
 @app.put("/messages/{message_id}", response_model=Message)
-async def update_message(message_id: str, update: MessageUpdate):
+async def update_message(message_id: str, update: Message):
     updated_message = ray.get(chat_app.edit_message.remote(message_id, update))
     if updated_message is None:
         raise HTTPException(status_code=404, detail="Message not found")
