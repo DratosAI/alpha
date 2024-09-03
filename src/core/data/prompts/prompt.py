@@ -3,7 +3,7 @@ from typing import Optional, List
 from pydantic import Field
 
 from api.config.config import Config
-from src.core.data.domain import DomainObject, DomainObjectAccessor, DomainObjectSelector
+from src.core.data.domain.base import DomainObject, DomainObjectAccessor, DomainObjectSelector
 from src.core.data.domain.base.domain_object import DomainObjectFactory
 from src.core.data.prompts.prompt_settings import PromptSettings
 

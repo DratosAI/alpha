@@ -1,4 +1,4 @@
-from .data import (
+from src.core.data import (
     DomainObject,
     DomainObjectError,
     ULIDValidationError,
@@ -13,6 +13,7 @@ from .data import (
     ArtifactError,
     ArtifactFactory,
     ArtifactSelector,
+    Message,
 )
 
 from src.core.agents.base.base_agent import Agent
@@ -35,4 +36,5 @@ __all__ = [
     "ArtifactError",
     "ArtifactFactory",
     "ArtifactSelector",
+    "Message",
 ]

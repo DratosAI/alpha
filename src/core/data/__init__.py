@@ -8,6 +8,7 @@ from .prompts.prompt import (
     PromptSettingsSelector,
 )
 from .structs.artifacts.artifact import Artifact, ArtifactAccessor, ArtifactError, ArtifactFactory, ArtifactSelector
+from src.core.data.structs.messages.message import Message
 
 __all__ = [
     "DomainObject",
@@ -24,4 +25,5 @@ __all__ = [
     "ArtifactError",
     "ArtifactFactory",
     "ArtifactSelector",
+    "Message",
 ]

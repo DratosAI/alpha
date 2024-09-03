@@ -7,7 +7,7 @@ import mlflow
 from mlflow import deployments
 from src.core.data.domain.base import DomainObject
 from src.core.data.prompts import Prompt, PromptSettings
-from src.core.data.structs.messages import Message
+from src.core.data.structs.messages.message import Message
 from api.config import config
 
 load_dotenv()
@@ -25,12 +25,8 @@ class LLM(DomainObject):
     prompt_settings: PromptSettings = Field(
         default=None, description="Prompt settings to use for the model"
     )
-    history: Optional[List[str]] = Field(
-        default=[], description="History of messages"
-    )
-    is_async: bool = Field(
-        default=False, description="Whether to stream the output"
-    )
+    history: Optional[List[str]] = Field(default=[], description="History of messages")
+    is_async: bool = Field(default=False, description="Whether to stream the output")
     api_key: str = Field(
         default=os.environ.get("OPENAI_API_KEY"),
         description="API key to use for the model",
@@ -74,6 +70,7 @@ class LLM(DomainObject):
 
         mlflow.openai.autolog()
         response = client.chat.completions.create(
+            response_format=response_model,
             model=self.model_name,
             messages=messages,
             max_tokens=self.prompt_settings.max_tokens,

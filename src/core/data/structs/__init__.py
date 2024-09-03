@@ -4,6 +4,7 @@ from .artifacts import ArtifactAccessor
 from .artifacts import ArtifactError
 from .artifacts import ArtifactFactory
 from .artifacts import ArtifactSelector
+from .messages.message import Message
 
 __all__ = [
     "DomainObject",
@@ -14,4 +15,5 @@ __all__ = [
     "ArtifactError",
     "ArtifactFactory",
     "ArtifactSelector",
+    "Message",
 ]
